@@ -185,7 +185,7 @@ let NAMA='',GSF=0,KM=[],CT={},SC=new Set();
 const tc=s=>String(s||'').toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
 function gate(){const g=$('#gt');g.style.display=NAMA?'none':'flex';$('#ftn').textContent=NAMA?tc(NAMA):'';$('#fto').style.display=NAMA?'block':'none';
 if(!NAMA&&!GSF){GSF=1;$('#gs').innerHTML='<option value="">Pilih namamu...</option>'+MHS.map(n=>`<option value="${esc(n)}">${esc(tc(n))}</option>`).join('')}}
-function masuk(){const v=$('#gs').value;if(!v){alert('Pilih namamu dulu.');return}NAMA=v;try{localStorage.setItem('tk_nama',v)}catch(e){}gate();draw();ping()}
+function masuk(){const v=$('#gs').value;if(!v){alert('Pilih namamu dulu.');return}NAMA=v;try{localStorage.setItem('tk_nama',v)}catch(e){}gate();draw();ping(1)}
 function keluar(){NAMA='';try{localStorage.removeItem('tk_nama')}catch(e){}gate();draw()}
 const ck=x=>'i'+hs(x.k+'|'+x.t);
 function cmBox(x){if(!/^https:\/\/script\.google\.com\//.test(API()))return'';const k=ck(x),l=KM.filter(c=>c.k==k),o=SC.has(k);
@@ -196,12 +196,14 @@ fetch(API(),{method:'POST',body:JSON.stringify({aksi:'komentar',kunci:k,nama:NAM
 function cmDel(id){if(!AB||!confirm('Hapus komentar ini?'))return;api({aksi:'hapusKomentar',id:id}).then(r=>{if(r.ok)cmLoad();else alert(r.msg)}).catch(()=>alert('Gagal menghapus komentar.'))}
 let ST=null,STN=null;
 const hr2=n=>String(n).padStart(2,'0')+'.00';
-function ping(){if(!NAMA||document.hidden||!/^https:\/\/script\.google\.com\//.test(API()))return;
-fetch(API(),{method:'POST',body:JSON.stringify({aksi:'ping',nama:NAMA})}).then(r=>r.json()).then(r=>{if(r.ok){ST=r;if(tab=='home')draw(1)}}).catch(()=>{})}
+let STE='';
+function ping(l){if(!NAMA||document.hidden||!/^https:\/\/script\.google\.com\//.test(API()))return;
+fetch(API(),{method:'POST',body:JSON.stringify({aksi:'ping',nama:NAMA,login:l?1:0})}).then(r=>r.json()).then(r=>{if(r.ok){ST=r;STE=''}else STE=r.msg==='Kode pengurus salah'?'server absen belum versi terbaru':(r.msg||'gagal memuat');if(tab=='home')draw(1)}).catch(()=>{STE='tidak bisa terhubung ke server';if(tab=='home')draw(1)})}
 function stNama(){if(!AB)return;api({aksi:'statusNama'}).then(r=>{if(r.ok){STN=r;draw(1)}else alert(r.msg)}).catch(()=>alert('Gagal memuat daftar nama.'))}
-function aktv(){if(!ST)return'';const tot=ST.total||MHS.length,mx=Math.max(1,...ST.hari7.map(x=>x.n)),mj=Math.max(...ST.jam),pk=ST.jam.indexOf(mj),hn=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+function aktv(){if(!/^https:\/\/script\.google\.com\//.test(API()))return'';
+if(!ST)return`<div class="card"><b>📊 Aktivitas kelas</b><small>${STE?'Statistik belum bisa dimuat ('+esc(STE)+'). Muat ulang halaman atau hubungi pengurus.':'Memuat statistik...'}</small></div>`;const tot=ST.total||MHS.length,mx=Math.max(1,...ST.hari7.map(x=>x.n)),mj=Math.max(...ST.jam),pk=ST.jam.indexOf(mj),hn=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
 let nm='';if(STN&&AB){const hs=STN.namaHari.map(x=>x.toUpperCase()),bl=MHS.filter(n=>!hs.includes(n)),j=a=>esc(a.map(tc).join(', ')||'-');
-nm=`<div style="margin-top:8px"><small><b>🟢 Online (${STN.namaOnline.length}):</b> ${j(STN.namaOnline)}</small><small style="margin-top:4px"><b>✅ Sudah buka hari ini (${STN.namaHari.length}):</b> ${j(STN.namaHari)}</small><small style="margin-top:4px"><b>⏳ Belum buka (${bl.length}):</b> ${j(bl)}</small></div>`}
+nm=`<div style="margin-top:8px"><small><b>🟢 Online (${STN.namaOnline.length}):</b> ${j(STN.namaOnline)}</small><small style="margin-top:4px"><b>✅ Sudah buka hari ini (${STN.namaHari.length}):</b> ${j(STN.namaHari)}</small><small style="margin-top:4px"><b>⏳ Belum buka (${bl.length}):</b> ${j(bl)}</small><small style="margin-top:4px"><b>🕘 Login terakhir:</b> ${esc((STN.login||[]).map(x=>tc(x.n)+' ('+x.t.slice(5,16)+')').join(', ')||'-')}</small></div>`}
 return`<div class="card"><b>📊 Aktivitas kelas</b><small>🟢 ${ST.online} online sekarang · 👥 ${ST.hari} dari ${tot} sudah membuka hari ini</small><div style="display:flex;align-items:flex-end;gap:6px;margin:10px 0 4px">${ST.hari7.map(x=>`<div style="flex:1;text-align:center"><small style="font-size:10.5px">${x.n}</small><div style="height:${Math.max(3,Math.round(x.n/mx*40))}px;background:var(--blue);border-radius:4px"></div><small style="font-size:10.5px">${hn[D(x.t).getDay()]}</small></div>`).join('')}</div><small>${mj>0?'Jam teramai hari ini: '+hr2(pk)+' ('+mj+' orang)':'Belum ada yang membuka hari ini.'}</small>${AB?`<button class="chip2" onclick="stNama()">Lihat siapa saja</button>`:''}${nm}</div>`}
 function dm(on){document.documentElement.toggleAttribute('data-dark',on);$('#dm').textContent=on?'☀️':'🌙';$('#dm').setAttribute('aria-label',on?'Mode terang':'Mode gelap');try{localStorage.setItem('tk_dm',on?'1':'0')}catch(e){}}
 function load(){const done_=()=>{try{localStorage.setItem('tk_c',JSON.stringify([T,L,I,DS,KS]))}catch(e){}draw();cmLoad();ping()};
