@@ -329,9 +329,12 @@ dlg('Akses diterima','Sheets hanya bisa diedit oleh akun Google yang sudah kamu 
 let POSTS=[],PF=null,PU=0,PV='',CMX='';
 const ksl=()=>[...new Set([ORG,SEED,...(I||[])].map(x=>x.k))];
 const EXT={pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',txt:'text/plain'};
-const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
-function pfPick(el,kind){const f=el.files&&el.files[0];el.value='';if(!f)return;if(f.size>10*1024*1024&&kind!='gambar'){alert('Ukuran lampiran maksimal 10 MB. Untuk video besar, unggah ke Drive lalu tempel linknya di postingan.');return}PF={f:f,kind:kind};draw(1)}
-async function medB64(){const f=PF.f;let url=await rd(f),nama=f.name,mime=f.type||EXT[nama.split('.').pop().toLowerCase()]||'application/octet-stream';
+const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(new Error('Gagal membaca file ('+((r.error&&r.error.name)||'tidak diketahui')+')'));r.readAsDataURL(f)});
+async function pfPick(el,kind){const f=el.files&&el.files[0];if(!f)return;
+if(f.size>(kind=='gambar'?40:10)*1024*1024){el.value='';alert(kind=='gambar'?'Foto terlalu besar. Pilih foto lain.':'Ukuran lampiran maksimal 10 MB. Untuk video besar, unggah ke Drive lalu tempel linknya di postingan.');return}
+try{const url=await rd(f);PF={f:{name:f.name,type:f.type,size:f.size},kind:kind,url:url};el.value='';draw(1)}
+catch(e){el.value='';alert('File tidak bisa dibaca dari perangkat. Coba pilih ulang. Jika dari Google Foto atau Drive, unduh dulu ke penyimpanan HP. Detail: '+(e&&e.message||e))}}
+async function medB64(){let url=PF.url,nama=PF.f.name,mime=PF.f.type||EXT[nama.split('.').pop().toLowerCase()]||'application/octet-stream';
 if(PF.kind=='gambar'&&/^image\/(jpeg|png|webp)$/.test(mime)){try{const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url}),s=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.82);mime='image/jpeg';nama=nama.replace(/\.\w+$/,'')+'.jpg'}catch(e){}}
 return{nama:nama,mime:mime,b64:url.split(',')[1]}}
 async function pfSend(){if(!NAMA){gate();return}const x=(CT.post||'').trim();if(!x&&!PF){alert('Tulis sesuatu atau pilih lampiran dulu.');return}if(PU)return;PU=1;draw(1);
@@ -339,7 +342,7 @@ try{const body={aksi:'post',nama:NAMA,isi:x};if(PF)body.media=await medB64();
 const res=await fetch(API(),{method:'POST',body:JSON.stringify(body)}),tx=await res.text();let r;
 try{r=JSON.parse(tx)}catch(e){throw new Error('SERVER:'+tx.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,140))}
 if(r.ok){CT.post='';PF=null;await cmLoad()}else alert(r.msg)}
-catch(e){const m=String(e&&e.message||e);alert(m.indexOf('SERVER:')==0?'Server menolak kiriman. Kemungkinan izin Google Drive di Apps Script belum disetujui atau file terlalu besar. Detail: '+m.slice(7):'Postingan gagal terkirim. '+(PF?'Coba file yang lebih kecil (maks. 10 MB). Detail: ':'Cek koneksi lalu coba lagi. Detail: ')+m.slice(0,100))}
+catch(e){const m=e&&e.message?e.message:(e&&e.target&&e.target.error?e.target.error.name:String(e));alert(m.indexOf('SERVER:')==0?'Server menolak kiriman. Kemungkinan izin Google Drive di Apps Script belum disetujui atau file terlalu besar. Detail: '+m.slice(7):'Postingan gagal terkirim. '+(PF?'Coba file yang lebih kecil (maks. 10 MB). Detail: ':'Cek koneksi lalu coba lagi. Detail: ')+m.slice(0,100))}
 PU=0;draw(1)}
 const composer=()=>NAMA&&/^https:\/\/script\.google\.com\//.test(API())?`<div class="card"><b>📝 Buat postingan</b><textarea class="cmt" rows="3" maxlength="500" placeholder="Apa yang ingin kamu bagikan, ${esc(tc(NAMA).split(' ')[0])}?" aria-label="Isi postingan" oninput="CT.post=this.value">${esc(CT.post||'')}</textarea>${PF?`<div class="act"><span class="bd d">${{gambar:'🖼️',file:'📎',video:'🎥'}[PF.kind]} ${esc(PF.f.name)}</span><button class="cta2" onclick="PF=null;draw(1)">✕ Hapus</button></div>`:''}<div class="act"><label class="cta2" for="pgi">🖼️ Gambar</label><label class="cta2" for="pfi">📎 File</label><label class="cta2" for="pvi">🎥 Video</label><button class="cta" ${PU?'disabled':''} onclick="pfSend()">${PU?'Mengunggah...':'Posting'}</button></div><small>Terlihat oleh semua teman sekelas. Lampiran maksimal 10 MB.</small></div>`:'';
 const pLinks=s=>esc(s).replace(/(https:\/\/[^\s<]+)/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
