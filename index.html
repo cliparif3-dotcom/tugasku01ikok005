@@ -110,8 +110,7 @@ const mts=c=>{let a=[];W.forEach(w=>{if(typeof w[3]=='string')return;const x=cel
 const cw=()=>{const t=td();return W.find(w=>t>=D(w[2])&&t<=A(D(w[2]),6))};
 const KC=k=>k==1?'var(--k1)':'var(--k2)';
 let tab='home',fk=0,fj='',fc='',T=[],done=[];
-try{done=JSON.parse(localStorage.getItem('tk_d')||'[]')}catch(e){}
-const sv=()=>{try{localStorage.setItem('tk_d',JSON.stringify(done))}catch(e){}};
+const sv=()=>{try{localStorage.setItem(UK('tk_d'),JSON.stringify(done))}catch(e){}};
 function dl(t){const n=Math.round((D(t.dl)-td())/864e5),dn=done.includes(t.id);return{n,dn,txt:n<0?'Lewat '+(-n)+' hari':n==0?'Hari ini':n==1?'Besok':'H-'+n,col:dn?'#9AA3BA':n<=1?'var(--red)':n<=3?'#E39B00':'var(--k2)'}}
 function item(t){const c=C[t.c],x=dl(t),s=stat(t.id),kl=L.find(y=>y.tp=='K'&&y.c==t.c),bl={b:'🔴 Belum Dikerjakan',p:'🟠 Sedang Dikerjakan',d:'🟢 Selesai'}[s],
 dt=s=='d'?(DT[t.id]?`<small>✓ Selesai: ${new Date(DT[t.id]).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small>`:''):`<small style="color:${x.col};font-weight:600">⏰ Deadline ${x.n<0?'terlewat '+(-x.n)+' hari':x.n==0?'hari ini':x.n==1?'besok':x.n+' hari lagi'} · ${F(D(t.dl))}</small>`;
@@ -213,8 +212,8 @@ let NAMA='',GSF=0,KM=[],CT={},SC=new Set();
 const tc=s=>String(s||'').toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
 function gate(){const g=$('#gt');g.style.display=NAMA?'none':'flex';$('#ftn').textContent=NAMA?tc(NAMA):'';$('#fto').style.display=NAMA?'block':'none';
 if(!NAMA&&!GSF){GSF=1;$('#gs').innerHTML='<option value="">Pilih namamu...</option>'+MHS.map(n=>`<option value="${esc(n)}">${esc(tc(n))}</option>`).join('')}}
-function masuk(){const v=$('#gs').value;if(!v){alert('Pilih namamu dulu.');return}NAMA=v;try{localStorage.setItem('tk_nama',v)}catch(e){}gate();draw();ping(1)}
-function keluar(){NAMA='';try{localStorage.removeItem('tk_nama')}catch(e){}gate();draw()}
+function masuk(){const v=$('#gs').value;if(!v){alert('Pilih namamu dulu.');return}NAMA=v;try{localStorage.setItem('tk_nama',v)}catch(e){}loadUser();nBase();gate();draw();ping(1)}
+function keluar(){NAMA='';try{localStorage.removeItem('tk_nama')}catch(e){}loadUser();gate();draw()}
 const ck=x=>'i'+hs(x.k+'|'+x.t);
 function cmBox(x){if(x.o||!/^https:\/\/script\.google\.com\//.test(API()))return'';const k=x.ck||ck(x),l=KM.filter(c=>c.k==k),o=SC.has(k);
 return`<div style="margin-top:8px"><button class="chip2" aria-expanded="${o}" onclick="SC.has('${k}')?SC.delete('${k}'):SC.add('${k}');draw(1)">💬 Komentar (${l.length})</button>${o?`<div style="margin-top:8px">${l.length?l.map(c=>`<div class="cm"><b>${esc(tc(c.n))}</b> <small>${esc(c.t)}</small>${cmMn(c)}<div style="white-space:pre-line">${CE==c.id?cmEd(c):esc(c.x)}</div></div>`).join(''):'<small>Belum ada komentar. Jadilah yang pertama.</small>'}<textarea class="cmt" id="cm-${k}" rows="2" maxlength="300" placeholder="Tulis komentar sebagai ${esc(tc(NAMA))}..." aria-label="Tulis komentar" oninput="CT['${k}']=this.value">${esc(CT[k]||'')}</textarea><button class="go" onclick="cmSend('${k}')">Kirim</button></div>`:''}</div>`}
@@ -234,9 +233,9 @@ let nm='';if(STN&&AB){const hs=STN.namaHari.map(x=>x.toUpperCase()),bl=MHS.filte
 nm=`<div style="margin-top:8px"><small><b>🟢 Online (${STN.namaOnline.length}):</b> ${j(STN.namaOnline)}</small><small style="margin-top:4px"><b>✅ Sudah buka hari ini (${STN.namaHari.length}):</b> ${j(STN.namaHari)}</small><small style="margin-top:4px"><b>⏳ Belum buka (${bl.length}):</b> ${j(bl)}</small><small style="margin-top:4px"><b>🕘 Login terakhir:</b> ${esc((STN.login||[]).map(x=>tc(x.n)+' ('+x.t.slice(5,16)+')').join(', ')||'-')}</small></div>`}
 return`<div class="card"><b>📊 Aktivitas kelas</b><small>🟢 ${ST.online} online sekarang · 👥 ${ST.hari} dari ${tot} sudah membuka hari ini</small><div style="display:flex;align-items:flex-end;gap:6px;margin:10px 0 4px">${ST.hari7.map(x=>`<div style="flex:1;text-align:center"><small style="font-size:10.5px">${x.n}</small><div style="height:${Math.max(3,Math.round(x.n/mx*40))}px;background:var(--blue);border-radius:4px"></div><small style="font-size:10.5px">${hn[D(x.t).getDay()]}</small></div>`).join('')}</div><small>${mj>0?'Jam teramai hari ini: '+hr2(pk)+' ('+mj+' orang)':'Belum ada yang membuka hari ini.'}</small>${AB?`<button class="chip2" onclick="stNama()">Lihat siapa saja</button>`:''}${nm}</div>`}
 let mg=1,mc=-1,jt=0,ts='a',tj='',tm='',tp=0,CM='',CE='',DL=[];
-let prog=[];try{prog=JSON.parse(localStorage.getItem('tk_p')||'[]')}catch(e){}
+let prog=[];
 const stat=id=>done.includes(id)?'d':prog.includes(id)?'p':'b';
-const svp=()=>{try{localStorage.setItem('tk_p',JSON.stringify(prog))}catch(e){}};
+const svp=()=>{try{localStorage.setItem(UK('tk_p'),JSON.stringify(prog))}catch(e){}};
 const sk=k=>C.filter(c=>c.k==k).reduce((a,c)=>a+c.s,0);
 const emptyState=()=>'<div class="emp">🎉 <b>Tidak ada tugas!</b><br>Semua tugas sudah selesai.</div>';
 const dsd=c=>{const s=DS.find(x=>x.c==c.i)||{},b=DOS[c.i]||{};return{d:s.d||b.d,j:s.j||b.j,r:s.r||b.r,w:s.w}};
@@ -273,9 +272,9 @@ function cmAsk(id){CM='';draw(1);dlg('Hapus komentar?','Komentar ini akan dihapu
 function cmSave(id){const x=(CT['e'+id]||'').trim();if(!x){alert('Komentar tidak boleh kosong.');return}
 fetch(API(),{method:'POST',body:JSON.stringify({aksi:'editKomentar',id:id,nama:NAMA,isi:x})}).then(r=>r.json()).then(r=>{if(r.ok){CE='';cmLoad()}else alert(r.msg)}).catch(()=>alert('Komentar gagal disimpan.'))}
 function cmDel(id){const c=KM.find(x=>x.id==id),o=c&&own(c),p=o?fetch(API(),{method:'POST',body:JSON.stringify({aksi:'hapusKomentarSendiri',id:id,nama:NAMA})}).then(r=>r.json()):(AB?api({aksi:'hapusKomentar',id:id}):null);if(!p)return;p.then(r=>{if(r.ok)cmLoad();else alert(r.msg)}).catch(()=>alert('Gagal menghapus komentar.'))}
-let NS=null;try{const v=localStorage.getItem('tk_ns');NS=v?JSON.parse(v):null}catch(e){}
-let EV=[],DT={};try{EV=JSON.parse(localStorage.getItem('tk_ev')||'[]');DT=JSON.parse(localStorage.getItem('tk_dt')||'{}')}catch(e){}
-const svn=()=>{try{if(NS)localStorage.setItem('tk_ns',JSON.stringify(NS));localStorage.setItem('tk_ev',JSON.stringify(EV));localStorage.setItem('tk_dt',JSON.stringify(DT))}catch(e){}};
+let NS=null;
+let EV=[],DT={};
+const svn=()=>{try{if(NS)localStorage.setItem(UK('tk_ns'),JSON.stringify(NS));localStorage.setItem(UK('tk_ev'),JSON.stringify(EV));localStorage.setItem(UK('tk_dt'),JSON.stringify(DT))}catch(e){}};
 // Notifikasi dibuat dari data yang ada: reminder deadline 7/3/1 hari, pengumuman, materi, komentar, tugas selesai
 function notifs(){const a=[],n=td(),ks=ksl();
 T.filter(t=>stat(t.id)!='d').forEach(t=>{const d=Math.round((D(t.dl)-n)/864e5);if(d<0||d>7)return;const lv=d<=1?1:d<=3?3:7;a.push({k:'dl:'+t.id+':'+lv,i:d<=1?'🔴':d<=3?'🟠':'🟡',x:'Tugas '+t.t+(d==0?' berakhir hari ini.':d==1?' akan berakhir besok.':' berakhir '+d+' hari lagi.'),o:d,to:{tab:'tgs',ts:'a'}})});
@@ -295,10 +294,9 @@ if(t.tab=='info'){fi=t.fi=='post'?ksl().length+2:t.fi;if(t.sc)SC.add(t.sc)}
 if(t.tab=='mk'){mc=t.mc;mb=0}if(t.tab=='tgs'){tp=0;ts=t.ts||'a'}
 draw();if(t.sc)setTimeout(()=>{const e=document.getElementById&&document.getElementById('cm-'+t.sc);if(e&&e.scrollIntoView)e.scrollIntoView({block:'center'})},60)}
 let jv=0,km=[2026,9],ks0='',mb=0,BM=[],CN={},IP=null;
-try{BM=JSON.parse(localStorage.getItem('tk_bm')||'[]');CN=JSON.parse(localStorage.getItem('tk_cn')||'{}')}catch(e){}
 const modRow=(x,sc)=>{const k=hs(x.u),on=BM.includes(k);return`<div class="tk"><div><b>${esc(x.t)}</b>${sc?`<small>${C[x.c].e} ${C[x.c].n}</small>`:''}${x.cat?`<small>${esc(x.cat)}</small>`:''}<a class="go" href="${esc(x.u)}" target="_blank" rel="noopener">Buka materi</a></div><button class="star" aria-label="${on?'Hapus dari materi tersimpan':'Simpan materi'}" aria-pressed="${on}" onclick="bmT('${k}')">${on?'⭐':'☆'}</button></div>`};
-function bmT(k){BM=BM.includes(k)?BM.filter(x=>x!=k):[...BM,k];try{localStorage.setItem('tk_bm',JSON.stringify(BM))}catch(e){}draw(1)}
-function cnSave(i,v){if(v)CN[i]=v;else delete CN[i];try{localStorage.setItem('tk_cn',JSON.stringify(CN))}catch(e){}}
+function bmT(k){BM=BM.includes(k)?BM.filter(x=>x!=k):[...BM,k];try{localStorage.setItem(UK('tk_bm'),JSON.stringify(BM))}catch(e){}draw(1)}
+function cnSave(i,v){if(v)CN[i]=v;else delete CN[i];try{localStorage.setItem(UK('tk_cn'),JSON.stringify(CN))}catch(e){}}
 const BL=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const AK=CFG.akademik;
 const AKC={k:['#F28C28','Awal perkuliahan'],u:['#E6B800','UTS/UAS'],b:['#2F6FED','Pembayaran & registrasi'],l:['#E5383B','Libur'],i:['#7B88A8','Info akademik']};
@@ -332,14 +330,18 @@ let POSTS=[],PF=null,PU=0,PV='',CMX='';
 const ksl=()=>[...new Set([ORG,SEED,...(I||[])].map(x=>x.k))];
 const EXT={pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',txt:'text/plain'};
 const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
-function pfPick(el,kind){const f=el.files&&el.files[0];el.value='';if(!f)return;if(f.size>15*1024*1024&&kind!='gambar'){alert('Ukuran lampiran maksimal 15 MB. Untuk video besar, unggah ke Drive lalu tempel linknya di postingan.');return}PF={f:f,kind:kind};draw(1)}
+function pfPick(el,kind){const f=el.files&&el.files[0];el.value='';if(!f)return;if(f.size>10*1024*1024&&kind!='gambar'){alert('Ukuran lampiran maksimal 10 MB. Untuk video besar, unggah ke Drive lalu tempel linknya di postingan.');return}PF={f:f,kind:kind};draw(1)}
 async function medB64(){const f=PF.f;let url=await rd(f),nama=f.name,mime=f.type||EXT[nama.split('.').pop().toLowerCase()]||'application/octet-stream';
-if(PF.kind=='gambar'&&/^image\/(jpeg|png|webp)$/.test(mime)){const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url}),s=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.82);mime='image/jpeg';nama=nama.replace(/\.\w+$/,'')+'.jpg'}
+if(PF.kind=='gambar'&&/^image\/(jpeg|png|webp)$/.test(mime)){try{const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url}),s=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.82);mime='image/jpeg';nama=nama.replace(/\.\w+$/,'')+'.jpg'}catch(e){}}
 return{nama:nama,mime:mime,b64:url.split(',')[1]}}
 async function pfSend(){if(!NAMA){gate();return}const x=(CT.post||'').trim();if(!x&&!PF){alert('Tulis sesuatu atau pilih lampiran dulu.');return}if(PU)return;PU=1;draw(1);
-try{const body={aksi:'post',nama:NAMA,isi:x};if(PF)body.media=await medB64();const r=await fetch(API(),{method:'POST',body:JSON.stringify(body)}).then(r=>r.json());if(r.ok){CT.post='';PF=null;await cmLoad()}else alert(r.msg)}catch(e){alert('Postingan gagal terkirim. Cek koneksi lalu coba lagi.')}
+try{const body={aksi:'post',nama:NAMA,isi:x};if(PF)body.media=await medB64();
+const res=await fetch(API(),{method:'POST',body:JSON.stringify(body)}),tx=await res.text();let r;
+try{r=JSON.parse(tx)}catch(e){throw new Error('SERVER:'+tx.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,140))}
+if(r.ok){CT.post='';PF=null;await cmLoad()}else alert(r.msg)}
+catch(e){const m=String(e&&e.message||e);alert(m.indexOf('SERVER:')==0?'Server menolak kiriman. Kemungkinan izin Google Drive di Apps Script belum disetujui atau file terlalu besar. Detail: '+m.slice(7):'Postingan gagal terkirim. '+(PF?'Coba file yang lebih kecil (maks. 10 MB). Detail: ':'Cek koneksi lalu coba lagi. Detail: ')+m.slice(0,100))}
 PU=0;draw(1)}
-const composer=()=>NAMA&&/^https:\/\/script\.google\.com\//.test(API())?`<div class="card"><b>📝 Buat postingan</b><textarea class="cmt" rows="3" maxlength="500" placeholder="Apa yang ingin kamu bagikan, ${esc(tc(NAMA).split(' ')[0])}?" aria-label="Isi postingan" oninput="CT.post=this.value">${esc(CT.post||'')}</textarea>${PF?`<div class="act"><span class="bd d">${{gambar:'🖼️',file:'📎',video:'🎥'}[PF.kind]} ${esc(PF.f.name)}</span><button class="cta2" onclick="PF=null;draw(1)">✕ Hapus</button></div>`:''}<div class="act"><label class="cta2" for="pgi">🖼️ Gambar</label><label class="cta2" for="pfi">📎 File</label><label class="cta2" for="pvi">🎥 Video</label><button class="cta" ${PU?'disabled':''} onclick="pfSend()">${PU?'Mengunggah...':'Posting'}</button></div><small>Terlihat oleh semua teman sekelas. Lampiran maksimal 15 MB.</small></div>`:'';
+const composer=()=>NAMA&&/^https:\/\/script\.google\.com\//.test(API())?`<div class="card"><b>📝 Buat postingan</b><textarea class="cmt" rows="3" maxlength="500" placeholder="Apa yang ingin kamu bagikan, ${esc(tc(NAMA).split(' ')[0])}?" aria-label="Isi postingan" oninput="CT.post=this.value">${esc(CT.post||'')}</textarea>${PF?`<div class="act"><span class="bd d">${{gambar:'🖼️',file:'📎',video:'🎥'}[PF.kind]} ${esc(PF.f.name)}</span><button class="cta2" onclick="PF=null;draw(1)">✕ Hapus</button></div>`:''}<div class="act"><label class="cta2" for="pgi">🖼️ Gambar</label><label class="cta2" for="pfi">📎 File</label><label class="cta2" for="pvi">🎥 Video</label><button class="cta" ${PU?'disabled':''} onclick="pfSend()">${PU?'Mengunggah...':'Posting'}</button></div><small>Terlihat oleh semua teman sekelas. Lampiran maksimal 10 MB.</small></div>`:'';
 const pLinks=s=>esc(s).replace(/(https:\/\/[^\s<]+)/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
 function postCard(p){const k='p'+p.id;let md='';
 if(p.f){if(p.j=='gambar'){IM.push('https://drive.google.com/thumbnail?id='+p.f+'&sz=w2000');md=`<img class="pimg" loading="lazy" src="https://drive.google.com/thumbnail?id=${esc(p.f)}&sz=w1000" alt="Gambar postingan" onclick="zoom(${IM.length-1})" onerror="this.replaceWith(document.createTextNode('Gambar belum bisa dimuat.'))">`}
@@ -349,6 +351,11 @@ return`<div class="card">${own(p)||AB?`<div class="dm"><button class="x" aria-la
 const postSec=all=>{const l=all?POSTS:POSTS.slice(0,3);return`<h2>Postingan kelas</h2>${composer()}`+(l.length?l.map(postCard).join('')+(!all&&POSTS.length>3?`<button class="cta2" onclick="fi=${ksl().length+2};draw()">Lihat semua postingan →</button>`:''):'<div class="emp">Belum ada postingan.</div>')};
 function ppAsk(id){CMX='';draw(1);dlg('Hapus postingan?','Postingan ini akan dihapus dan tidak dapat dikembalikan.',[{t:'Batal'},{t:'Hapus',c:'cta dng',f:()=>ppDel(id)}])}
 function ppDel(id){const p=POSTS.find(x=>x.id==id),q=p&&own(p)?fetch(API(),{method:'POST',body:JSON.stringify({aksi:'hapusPostSendiri',id:id,nama:NAMA})}).then(r=>r.json()):(AB?api({aksi:'hapusPost',id:id}):null);if(!q)return;q.then(r=>{if(r.ok)cmLoad();else alert(r.msg)}).catch(()=>alert('Gagal menghapus postingan.'))}
+// Status pribadi (selesai, sedang, bookmark, catatan, notifikasi terbaca) disimpan terpisah untuk TIAP NAMA di perangkat ini
+const UK=k=>k+'_'+(NAMA?hs(NAMA):'tamu');
+function loadUser(){const g=(k,d)=>{try{const v=localStorage.getItem(UK(k));if(v!==null)return JSON.parse(v)}catch(e){}return d};
+if(NAMA){try{['tk_d','tk_p','tk_ns','tk_ev','tk_dt','tk_bm','tk_cn'].forEach(k=>{const o=localStorage.getItem(k);if(o===null)return;if(localStorage.getItem(UK(k))===null)localStorage.setItem(UK(k),o);localStorage.removeItem(k)})}catch(e){}}
+done=g('tk_d',[]);prog=g('tk_p',[]);NS=g('tk_ns',null);EV=g('tk_ev',[]);DT=g('tk_dt',{});BM=g('tk_bm',[]);CN=g('tk_cn',{})}
 function dm(on){document.documentElement.toggleAttribute('data-dark',on);$('#dm').textContent=on?'☀️':'🌙';$('#dm').setAttribute('aria-label',on?'Mode terang':'Mode gelap');try{localStorage.setItem('tk_dm',on?'1':'0')}catch(e){}}
 function load(){const done_=()=>{try{localStorage.setItem('tk_c',JSON.stringify([T,L,I,DS,KS]))}catch(e){}draw();cmLoad();ping();if(!/^https:\/\/script\.google\.com\//.test(API()))nBase()};
 Promise.all([get('Tugas'),get('Link'),gi(),gt('Dosen','matkul'),gt('Kas','tanggal')]).then(([a,b,c,d,e])=>{T=toT(a);L=toL(b);I=toI(c);DS=toDS(d);KS=toKS(e);er=0;done_()}).catch(()=>{er=1;try{[T,L,I,DS,KS]=JSON.parse(localStorage.getItem('tk_c'));I=I||[];DS=DS||[];KS=KS||[]}catch(e){}draw()})}
@@ -357,7 +364,7 @@ const l=L.filter(x=>x.tp==tp&&(fl===''||x.c==fl)).sort((a,b)=>K?((a.dl||'9')<(b.
 return`<small style="margin-bottom:8px">${s}</small><select class="sel" aria-label="Filter mata kuliah" onchange="fl=this.value;draw()"><option value="">Semua mata kuliah</option>${C.map(c=>`<option value="${c.i}" ${fl===String(c.i)?'selected':''}>${c.e} ${c.n}</option>`).join('')}</select>`+(l.length?l.map(x=>{const c=C[x.c],p=x.dl?dl({dl:x.dl,id:'-'}):null;return`<div class="tk"><div><b>${esc(x.t)}</b><small>${c.e} ${c.n}</small>${x.cat?`<small>${esc(x.cat)}</small>`:''}${x.dl?`<small>Batas: ${FL(D(x.dl))}</small>`:''}<a class="go" href="${esc(x.u)}" target="_blank" rel="noopener">${K?'Buka folder kumpul':'Buka modul'}</a></div>${p?`<span class="pill" style="background:${p.col}">${p.txt}</span>`:''}</div>`}).join(''):`<div class="emp">${K?'Belum ada link kumpul tugas.':'Belum ada modul.'}</div>`)}
 {let s=null;try{s=localStorage.getItem('tk_dm')}catch(e){}dm(s===null?!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches):s==='1')}
 applyCfg();
-{let s='';try{s=localStorage.getItem('tk_nama')||''}catch(e){}NAMA=MHS.includes(s)?s:''}gate();
+{let s='';try{s=localStorage.getItem('tk_nama')||''}catch(e){}NAMA=MHS.includes(s)?s:''}loadUser();gate();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){cmLoad();ping()}});
 setInterval(ping,60000);
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();IP=e;$('#fti').style.display='block'});
