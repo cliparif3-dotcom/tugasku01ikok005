@@ -1,7 +1,7 @@
 // TUGASKU - service worker: bisa dipasang di layar utama dan tetap terbuka saat offline.
 // Halaman selalu diambil dari internet dulu (supaya update langsung terlihat); salinan tersimpan dipakai kalau offline.
 // Data dari Google Sheets dan Apps Script tidak disimpan di sini (data terakhir disimpan oleh website sendiri).
-const V = 'tugasku-v3';
+const V = 'tugasku-v4';
 const FILES = ['./', 'index.html', 'manifest.json', 'config.js', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
